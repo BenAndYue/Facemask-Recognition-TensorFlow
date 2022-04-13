@@ -62,7 +62,11 @@ for annotation in glob.glob(annotations_directory + '/*.xml'):
                     information['label'] += [name]
                     information['width'] += [width]
                     information['height'] += [height] 
-                    information['file'] += [annotation.split('/')[-1][0:-4]] 
+                    a = annotation.replace("data/annotations\\", "")
+                    b = a.replace(".xml","")
+
+                    information['file'] += [b]
+                    # information['file'] += [annotation.replace('data/annotations',"")] 
                 if 'bndbox' in attribute.tag:
                     for dimension in list(attribute):
                         if 'xmin' in dimension.tag:
@@ -82,3 +86,44 @@ annotations_info_df = pd.DataFrame(information)
 annotations_info_df.head(10)
 
 # ======================= saved all the data for annotation
+annotations_info_df['annotation_file'] = annotations_info_df['file'] + '.xml'
+annotations_info_df['image_file'] = annotations_info_df['file'] + '.png'
+
+# Tidy Grammatical Issue
+annotations_info_df.loc[annotations_info_df['label'] == 'mask_weared_incorrect', 'label'] = 'mask_incorrectly_worn'
+annotations_info_df
+
+
+# ======================= cleaning and fixing data ^^^
+
+# check if the label is right
+
+# Function to Show Actual Image
+def render_image(image):
+    plt.figure(figsize = (12, 8))
+    plt.imshow(image)
+    plt.show()
+    
+# Function to Convert BGR to RGB
+def convert_to_RGB(image):
+    return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+annotations_info_df['image_file'].iloc[0]
+
+# check if 0 exist
+image_0_path= 'data/images/' + annotations_info_df['image_file'].iloc[0]
+image_0_path
+
+file737_exist = exists('data/images/maksssksksss0.png')
+print(image_0_path)
+
+image_0 = cv2.imread(image_0_path)
+image_0
+
+render_image(convert_to_RGB(image_0))
+
+annotation_737_path = 'data/annotations/' + annotations_info_df['annotation_file'].iloc[0]
+annotation_737_path
+
+image_0.shape
+
