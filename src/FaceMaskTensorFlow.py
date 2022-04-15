@@ -127,3 +127,51 @@ annotation_737_path
 
 image_0.shape
 
+#Since there are multiple labels in an image 
+# (caused by more than 1 person in an image),
+#  we need to crop the image into several images
+#  that only consist of 1 person. We can use on
+# e of the images (ex: image_0)
+#  as our sample to make sure that we can crop images in a correct way.
+
+x = annotations_info_df['xmin'].iloc[0]
+y = annotations_info_df['ymin'].iloc[0]
+width = annotations_info_df['xmax'].iloc[0]
+height = annotations_info_df['ymax'].iloc[0]
+
+cropped_0 = image_0[y:height, x:width]
+render_image(cropped_0)
+
+render_image(convert_to_RGB(cropped_0))
+
+# Now, we already know the way to crop a single image. 
+# We need to apply this to all images in the dataframe. 
+# So, there will be around 4072 cropped images so the
+#  "multiple label in an image" problem is solved.
+len(annotations_info_df)
+
+# adding cropped to new dic
+annotations_info_df['cropped_image_file'] = annotations_info_df['file']
+annotations_info_df
+
+for i in range(len(annotations_info_df)):
+    # Get The File Path and Read The Image
+    image_filepath = '../input/face-mask-detection/images/' + annotations_info_df['image_file'].iloc[i]
+    image = cv2.imread(image_filepath)
+    
+    # Set The Cropped Image File Name
+    annotations_info_df['cropped_image_file'].iloc[i] = annotations_info_df['cropped_image_file'].iloc[i] + '-' + str(i) + '.png'
+    cropped_image_filename = annotations_info_df['cropped_image_file'].iloc[i]
+    
+    # Get The xmin, ymin, xmax, ymax Value (Bounding Box) to Crop Image
+    xmin = annotations_info_df['xmin'].iloc[i]
+    ymin = annotations_info_df['ymin'].iloc[i]
+    xmax = annotations_info_df['xmax'].iloc[i]
+    ymax = annotations_info_df['ymax'].iloc[i]
+
+    # Crop The Image Based on The Values Above
+    cropped_image = image[ymin:ymax, xmin:xmax]
+    
+    # Save Cropped Image
+    cropped_image_directory = os.path.join('./cropped_images', cropped_image_filename) 
+    cv2.imwrite(cropped_image_directory, cropped_image)
